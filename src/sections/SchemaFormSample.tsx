@@ -4,20 +4,21 @@ import { z } from "zod";
 
 const schema = z.object({
   /** 名前 */
-  name: z.string().min(1, { message: "名前を入力してください" }),
+  name: z.string().min(1, { error: "名前を入力してください" }),
   /** 年齢 */
   age: z
-    .number({ message: "年齢を半角数字で入力してください" })
-    .int({ message: "年齢を整数で入力してください" })
-    .gte(12, { message: "年齢を12歳以上で入力してください" }),
+    .pipe(
+      z.number({ error: "年齢を半角数字で入力してください" }),
+      z.int({ error: "年齢を整数で入力してください" }),
+    )
+    .refine((n) => n >= 12, { error: "年齢を12歳以上で入力してください" }),
   /** メールアドレス */
-  email: z.union([
-    z
-      .string()
-      .email({ message: "メールアドレスの形式で入力してください" })
-      .nullish(),
-    z.literal(""),
-  ]),
+  email: z
+    .union([
+      z.email({ error: "メールアドレスの形式で入力してください" }),
+      z.literal(""),
+    ])
+    .optional(),
 });
 
 // スキーマから型を生成

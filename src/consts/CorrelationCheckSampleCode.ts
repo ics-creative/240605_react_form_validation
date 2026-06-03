@@ -2,18 +2,18 @@ export const CorrelationCheckSampleCode = `
 // 日付のスキーマ
 const dateSchema = z
   .object({
-    startDate: z.string().date("日付を入力してください"),
-    endDate: z.string().date("日付を入力してください"),
+    startDate: z.iso.date({ error: "日付を入力してください" }),
+    endDate: z.iso.date({ error: "日付を入力してください" }),
   })
   .refine((arg) => new Date(arg.startDate) < new Date(arg.endDate), {
-    message: "終了日は開始日より後の日付を入力してください",
+    error: "終了日は開始日より後の日付を入力してください",
     path: ["endDate"],
   });
 
 // フォーム全体のスキーマ
 const schema = z.object({
   // タイトルのスキーマ
-  title: z.string().min(1, { message: "タイトルを入力してください" }),
+  title: z.string().min(1, { error: "タイトルを入力してください" }),
   // 日付のスキーマ
   date: dateSchema,
 });
