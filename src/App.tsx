@@ -1,94 +1,97 @@
 import "./App.css";
-import { CorrelationCheckSampleCode } from "./consts/CorrelationCheckSampleCode.ts";
-import { ReactHookFormSampleCode } from "./consts/ReactHookFormSampleCode.ts";
-import { ReactSimpleFormSampleCode } from "./consts/ReactSimpleFormSampleCode.ts";
-import { SchemaFormSampleCode } from "./consts/SchemaFormSampleCode.ts";
-import { CorrelationCheckSample } from "./sections/CorrelationCheckSample.tsx";
-import { ReactHookFormSample } from "./sections/ReactHookFormSample.tsx";
-import { ReactSimpleFormSample } from "./sections/ReactSimpleFormSample.tsx";
-import { SchemaFormSample } from "./sections/SchemaFormSample.tsx";
+import { CorrelationCheckSampleCode } from "./consts/CorrelationCheckSampleCode";
+import { ReactHookFormSampleCode } from "./consts/ReactHookFormSampleCode";
+import { ReactSimpleFormSampleCode } from "./consts/ReactSimpleFormSampleCode";
+import { SchemaFormSampleCode } from "./consts/SchemaFormSampleCode";
+import { CorrelationCheckSample } from "./sections/CorrelationCheckSample";
+import { ReactHookFormSample } from "./sections/ReactHookFormSample";
+import { ReactSimpleFormSample } from "./sections/ReactSimpleFormSample";
+import { SchemaFormSample } from "./sections/SchemaFormSample";
 import { codeToHtml } from "shiki";
-import { useEffect, useState } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 
 const samples = [
-  ReactSimpleFormSampleCode,
-  ReactHookFormSampleCode,
-  SchemaFormSampleCode,
-  CorrelationCheckSampleCode,
+  {
+    id: "react",
+    title: "Reactを使用したフォーム",
+    Component: ReactSimpleFormSample,
+    code: ReactSimpleFormSampleCode,
+  },
+  {
+    id: "react-hook-form",
+    title: "React Hook Formを使用したフォーム",
+    Component: ReactHookFormSample,
+    code: ReactHookFormSampleCode,
+  },
+  {
+    id: "zod",
+    title: "Zodを使用したフォーム",
+    Component: SchemaFormSample,
+    code: SchemaFormSampleCode,
+  },
+  {
+    id: "correlation-check",
+    title: "Zodを使用した相関チェック",
+    Component: CorrelationCheckSample,
+    code: CorrelationCheckSampleCode,
+  },
 ];
 
+type Sample = {
+  id: string;
+  title: string;
+  Component: ComponentType;
+  code: string;
+};
+
+const highlightSample = (sample: Sample) =>
+  codeToHtml(sample.code, {
+    lang: "tsx",
+    theme: "github-dark",
+  });
+
 function App() {
-  const [value, setValue] = useState<string[]>([]);
+  const [highlightedSamples, setHighlightedSamples] = useState<
+    Record<string, string>
+  >({});
+
   useEffect(() => {
+    let isMounted = true;
+
     Promise.all(
-      samples.map((sample) =>
-        codeToHtml(sample, {
-          lang: "tsx",
-          theme: "github-dark",
-        }),
-      ),
-    ).then((result) => setValue(result));
+      samples.map(async (sample) => [sample.id, await highlightSample(sample)]),
+    ).then((entries) => {
+      if (isMounted) {
+        setHighlightedSamples(Object.fromEntries(entries));
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
   return (
     <>
-      <section id="section-1" className="section">
-        <div className="container is-max-desktop">
-          <div className="content">
-            <h2>Reactを使用したフォーム</h2>
-            <ReactSimpleFormSample />
-            <details>
-              <summary>コードを見る</summary>
-              <div className="content">
-                <pre>
-                  <code dangerouslySetInnerHTML={{ __html: value[0] }}></code>
-                </pre>
-              </div>
-            </details>
+      {samples.map(({ id, title, Component }) => (
+        <section key={id} id={id} className="section">
+          <div className="container is-max-desktop">
+            <div className="content">
+              <h2>{title}</h2>
+              <Component />
+              <details>
+                <summary>コードを見る</summary>
+                <div
+                  className="content"
+                  dangerouslySetInnerHTML={{
+                    __html: highlightedSamples[id] ?? "",
+                  }}
+                />
+              </details>
+            </div>
           </div>
-        </div>
-      </section>
-      <section id="section-2" className="section">
-        <div className="container is-max-desktop">
-          <div className="content">
-            <h2>React Hook Formを使用したフォーム</h2>
-            <ReactHookFormSample />
-            <details>
-              <summary>コードを見る</summary>
-              <div className="">
-                <pre dangerouslySetInnerHTML={{ __html: value[1] }}></pre>
-              </div>
-            </details>
-          </div>
-        </div>
-      </section>
-      <section id="section-3" className="section">
-        <div className="container is-max-desktop">
-          <div className="content">
-            <h2>Zodを使用したフォーム</h2>
-            <SchemaFormSample />
-            <details>
-              <summary>コードを見る</summary>
-              <div className="">
-                <pre dangerouslySetInnerHTML={{ __html: value[2] }}></pre>
-              </div>
-            </details>
-          </div>
-        </div>
-      </section>
-      <section id="section-4" className="section">
-        <div className="container is-max-desktop">
-          <div className="content">
-            <h2>Zodを使用した相関チェック</h2>
-            <CorrelationCheckSample />
-            <details>
-              <summary>コードを見る</summary>
-              <div className="">
-                <pre dangerouslySetInnerHTML={{ __html: value[3] }}></pre>
-              </div>
-            </details>
-          </div>
-        </div>
-      </section>
+        </section>
+      ))}
     </>
   );
 }

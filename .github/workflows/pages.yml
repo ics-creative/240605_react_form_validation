@@ -1,0 +1,62 @@
+# 静的コンテンツを GitHub Pages にデプロイするためのワークフロー
+name: Deploy to GitHub Pages
+
+on:
+  # デフォルトブランチへの push を対象に実行します
+  push:
+    branches: ['main']
+
+  # Actions タブから手動で実行できるようにします
+  workflow_dispatch:
+
+# 同じ Pages デプロイが並列に走らないようにします
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  # 依存関係をインストールして Vite の静的ファイルを生成します
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          # Vite のビルド成果物を Pages artifact としてアップロードします
+          path: dist
+
+  # build ジョブで作成した artifact を GitHub Pages に公開します
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # デプロイに必要な権限だけを deploy ジョブに付与します
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

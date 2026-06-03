@@ -1,4 +1,9 @@
-import { type ChangeEvent, type FormEvent, useState } from "react";
+import {
+  type ChangeEvent,
+  type FocusEvent,
+  type FormEvent,
+  useState,
+} from "react";
 const validate = (value: string) => {
   if (value.length === 0) {
     return "テキストを入力してください";
@@ -16,7 +21,7 @@ export const ReactSimpleFormSample = () => {
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   };
-  const onBlur = (e: ChangeEvent<HTMLInputElement>) => {
+  const onBlur = (e: FocusEvent<HTMLInputElement>) => {
     const result = validate(e.target.value);
     setError(result);
   };

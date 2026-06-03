@@ -1,0 +1,6 @@
+{
+  "cooldown": 7,
+  "target": "greatest",
+  "pre": 0,
+  "removeRange": true
+}

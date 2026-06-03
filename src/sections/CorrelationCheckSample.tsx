@@ -7,7 +7,7 @@ const dateSchema = z
     startDate: z.iso.date({ error: "日付を入力してください" }),
     endDate: z.iso.date({ error: "日付を入力してください" }),
   })
-  .refine((arg) => new Date(arg.startDate) < new Date(arg.endDate), {
+  .refine((arg) => arg.startDate < arg.endDate, {
     error: "終了日は開始日より後の日付を入力してください",
     path: ["endDate"],
   });
