@@ -29,6 +29,7 @@ export const CorrelationCheckSample = () => {
     getValues, // 🌟入力値を取得する
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
+    mode: "onTouched",
   });
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     // フォームの送信処理
